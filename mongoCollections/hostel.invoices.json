@@ -1,0 +1,72 @@
+[{
+  "_id": {
+    "$oid": "67ab714c3b69fee7613054ed"
+  },
+  "student": {
+    "$oid": "67979134f798e8abe58dc93e"
+  },
+  "title": "wasdf",
+  "amount": 980,
+  "status": "pending",
+  "deadline": {
+    "$date": "2025-03-06T00:00:00.000Z"
+  },
+  "date": {
+    "$date": "2025-02-11T15:48:28.043Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67ab714c3b69fee7613054ef"
+  },
+  "student": {
+    "$oid": "67979216f798e8abe58dc991"
+  },
+  "title": "wasdf",
+  "amount": 980,
+  "status": "approved",
+  "deadline": {
+    "$date": "2025-03-06T00:00:00.000Z"
+  },
+  "date": {
+    "$date": "2025-02-11T15:48:28.096Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67ab714c3b69fee7613054f1"
+  },
+  "student": {
+    "$oid": "679855b7ef8fe643f0c21447"
+  },
+  "title": "wasdf",
+  "amount": 980,
+  "status": "pending",
+  "deadline": {
+    "$date": "2025-03-06T00:00:00.000Z"
+  },
+  "date": {
+    "$date": "2025-02-11T15:48:28.141Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67ab714c3b69fee7613054f3"
+  },
+  "student": {
+    "$oid": "679b81b3fb1962ec107b240f"
+  },
+  "title": "wasdf",
+  "amount": 980,
+  "status": "pending",
+  "deadline": {
+    "$date": "2025-03-06T00:00:00.000Z"
+  },
+  "date": {
+    "$date": "2025-02-11T15:48:28.185Z"
+  },
+  "__v": 0
+}]

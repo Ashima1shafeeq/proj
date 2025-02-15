@@ -1,102 +1,123 @@
 import { Input } from "./Input";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { Loader } from "../../Dashboards/Common/Loader";
 
 export default function AdminSignIn() {
   let navigate = useNavigate();
-  const [loader, setLoader] = useState(false);
-  const [inputEmail, setInputEmail] = useState("");
-  const [pass, setPass] = useState("");
-
+  
   const getHostel = async () => {
     let admin = JSON.parse(localStorage.getItem("admin"));
-    if (!admin) return;
-
     try {
       const res = await fetch("http://localhost:3000/api/admin/get-hostel", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          "Content-Type": "application/json"
         },
-        body: JSON.stringify({ id: admin._id }),
+        body: JSON.stringify({ id: admin._id })
       });
 
       const data = await res.json();
-      if (data.success) {
-        localStorage.setItem("hostel", JSON.stringify(data.hostel));
-      }
+      localStorage.setItem("hostel", JSON.stringify(data.hostel));
     } catch (err) {
-      console.error("Error fetching hostel data:", err);
+      // console.log(err);
     }
   };
 
-  const login = async (event) => {
+  let login = async (event) => {
     event.preventDefault();
     setLoader(true);
+    let data = {
+      email: inputEmail,
+      password: pass,
+    };
 
-    try {
-      const response = await fetch("http://localhost:3000/api/auth/login", {
+    let response = await fetch("http://localhost:3000/api/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data)
+    });
+
+    let result = await response.json();
+
+
+    if (result.success) {
+      localStorage.setItem("token", result.data.token);
+      let admin = await fetch("http://localhost:3000/api/admin/get-admin", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          email: inputEmail,
-          password: pass,
-        }),
+          isAdmin: result.data.user.isAdmin,
+          token: result.data.token
+        })
       });
 
-      const result = await response.json();
-
-      if (!result.success) {
-        toast.error(result.errors?.[0]?.msg || "Login failed!", {
+      let adminResult = await admin.json();
+      if (adminResult.success) {
+        localStorage.setItem("admin", JSON.stringify(adminResult.admin));
+        await getHostel();
+        navigate("/admin-dashboard");
+      } else {
+        toast.error(
+          adminResult.errors[0].msg, {
           position: "top-right",
           autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
           theme: "dark",
-        });
-        setLoader(false);
-        return;
+        })
       }
-
-      localStorage.setItem("token", result.data.token);
-
-      // Fetch Admin Details
-      const adminResponse = await fetch("http://localhost:3000/api/admin/get-admin", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${result.data.token}`,
-        },
-      });
-
-      const adminResult = await adminResponse.json();
-
-      if (!adminResult.success) {
-        toast.error(adminResult.errors?.[0]?.msg || "Admin fetch failed!", {
-          position: "top-right",
-          autoClose: 3000,
-          theme: "dark",
-        });
-        setLoader(false);
-        return;
-      }
-
-      localStorage.setItem("admin", JSON.stringify(adminResult.admin));
-      await getHostel();
-      navigate("/admin-dashboard");
-    } catch (err) {
-      console.error("Login error:", err);
-      toast.error("Server error. Try again!", {
+    } else {
+      toast.error(
+        result.errors[0].msg, {
         position: "top-right",
         autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
         theme: "dark",
-      });
+      })
     }
     setLoader(false);
+  };
+
+  const [loader, setLoader] = useState(false);
+  const [inputEmail, setInputEmail] = useState("");
+  const [pass, setPass] = useState("");
+
+  const changeEmail = (event) => {
+    setInputEmail(event.target.value);
+  };
+  const changePass = (event) => {
+    setPass(event.target.value);
+  };
+
+  const email = {
+    name: "email",
+    type: "email",
+    placeholder: "abc@email.com",
+    req: true,
+    value: inputEmail,
+    onChange: changeEmail,
+  };
+  const password = {
+    name: "password",
+    type: "password",
+    placeholder: "••••••••",
+    req: true,
+    onChange: changePass,
+    value: pass,
   };
 
   return (
@@ -106,16 +127,55 @@ export default function AdminSignIn() {
           Sign in to your account - Manager
         </h1>
         <form className="space-y-4 md:space-y-6" onSubmit={login}>
-          <Input field={{ name: "email", type: "email", placeholder: "abc@email.com", req: true, value: inputEmail, onChange: (e) => setInputEmail(e.target.value) }} />
-          <Input field={{ name: "password", type: "password", placeholder: "••••••••", req: true, value: pass, onChange: (e) => setPass(e.target.value) }} />
-          <button type="submit" className="w-full text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-5 py-2.5">
-            {loader ? <><Loader /> Verifying...</> : <span>Sign in</span>}
+          <Input field={email} />
+          <Input field={password} />
+          <div className="flex items-center justify-between">
+            <div className="flex items-start">
+              <div className="flex items-center h-5">
+                <input
+                  type="checkbox"
+                  className="w-4 h-4 border rounded focus:ring-3 bg-gray-700 border-gray-600 focus:ring-blue-600 ring-offset-gray-800"
+                  required=""
+                />
+              </div>
+              <div className="ml-3 text-sm">
+                <label htmlFor="remember" className="text-gray-300">
+                  Remember me
+                </label>
+              </div>
+            </div>
+          </div>
+          <button
+            type="submit"
+            className="w-full text-white hover:bg-blue-700 focus:ring-4 focus:outline-none  font-medium rounded-lg text-sm px-5 py-2.5 text-center bg-blue-700 focus:ring-blue-800"
+          >
+            {loader ? (
+              <>
+                <Loader /> Verifying...
+              </>
+            ) : (
+              <span>Sign in</span>
+            )}
           </button>
-          <ToastContainer position="top-right" autoClose={3000} theme="dark" />
+          <ToastContainer
+            position="top-right"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="dark"
+          />
           <p className="text-sm font-light text-gray-400">
             You&apos;re a student?{" "}
-            <Link to="/auth/login" className="font-medium hover:underline text-blue-500">
-              Sign in Here.
+            <Link
+              to="/auth/login"
+              className="font-medium hover:underline text-blue-500"
+            >
+              Signin Here.
             </Link>
           </p>
         </form>
